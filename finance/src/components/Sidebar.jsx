@@ -1,0 +1,71 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  CreditCard,
+  PiggyBank,
+  Tags,
+  ArrowRightLeft,
+  TrendingDown,
+  Menu,
+} from 'lucide-react';
+
+export default function Sidebar({ collapsed, onToggle }) {
+  const navItems = [
+    { path: '/', name: 'Dashboard', icon: LayoutDashboard },
+    { path: '/despesas', name: 'Lançamentos', icon: TrendingDown },
+    { path: '/transacoes', name: 'Transações (Extrato)', icon: ArrowRightLeft },
+    { path: '/contas', name: 'Contas e Cartões', icon: CreditCard },
+    { path: '/caixinhas', name: 'Caixinhas', icon: PiggyBank },
+    { path: '/categorias', name: 'Categorias', icon: Tags },
+  ];
+
+  return (
+    <aside
+      className={`${
+        collapsed ? 'w-[88px]' : 'w-64'
+      } h-screen flex-col hidden md:flex z-20 relative transition-all duration-300 bg-[var(--surface)] shadow-[4px_0_24px_rgba(0,0,0,0.05)]`}
+    >
+      <div className={`p-4 flex items-center border-b border-[var(--brand-border)] ${collapsed ? 'justify-center' : 'justify-end'}`}>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="p-2.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--brand)] hover:bg-[var(--brand-soft)] transition-colors"
+          title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+          aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+        >
+          <Menu size={collapsed ? 24 : 20} />
+        </button>
+      </div>
+
+      <nav className={`flex-1 py-8 space-y-2 overflow-y-auto ${collapsed ? 'px-3' : 'px-4'}`}>
+        {!collapsed && (
+          <p className="px-4 text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>
+            Menu Principal
+          </p>
+        )}
+
+        {navItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            end={item.path === '/'}
+            title={item.name}
+            className={({ isActive }) =>
+              `flex items-center rounded-xl font-semibold transition-all duration-300 ${
+                collapsed ? 'justify-center px-0 py-3.5' : 'gap-3 px-4 py-3'
+              } ${
+                isActive
+                  ? 'bg-[var(--brand)] text-white shadow-md scale-[1.02]'
+                  : 'text-[var(--text-muted)] hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]'
+              }`
+            }
+          >
+            <item.icon size={collapsed ? 24 : 20} />
+            {!collapsed && item.name}
+          </NavLink>
+        ))}
+      </nav>
+    </aside>
+  );
+}

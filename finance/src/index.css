@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+:root {
+  --brand: #8b5cf6;
+  --brand-hover: #7c3aed;
+  --brand-dark: #4c1d95;
+  --brand-mid: #6b21a8;
+  --brand-light: #a78bfa;
+  --brand-soft: #f3e8ff;
+  --brand-border: #e9d5ff;
+  --app-bg: #f3e8ff;
+  --surface: #ffffff;
+  --text-main: #4c1d95;
+  --text-muted: #6b7280;
+  --header-bg: rgba(255, 255, 255, 0.6);
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--text-main);
+}
