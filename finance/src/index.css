@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import "tailwindcss";
 
 :root {
@@ -19,3 +20,6 @@ body {
   background: var(--app-bg);
   color: var(--text-main);
 }
+=======
+@import "tailwindcss";
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31

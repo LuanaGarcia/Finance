@@ -3,18 +3,36 @@ import { User, Mail, Lock } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebookF, faGooglePlusG, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 import '../styles/global.css';
+<<<<<<< HEAD
 import { api, setToken } from '../services/api';
 
 export default function Login({ onAuthSuccess }) {
   const [authMode, setAuthMode] = useState('sign-in-js');
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');
+=======
+
+// IMPORTAÇÕES NOVAS DO FIREBASE
+import { auth } from '../services/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+
+export default function Login() {
+  const [authMode, setAuthMode] = useState('sign-in-js');
+  const [loginError, setLoginError] = useState('');
+  const [signupError, setSignupError] = useState('');
+  
+  // Estado para mostrar que está carregando enquanto o Firebase processa
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
     const email = e.target.loginEmail.value;
     const password = e.target.loginPassword.value;
 
@@ -25,12 +43,22 @@ export default function Login({ onAuthSuccess }) {
 
     setIsLoading(true);
     try {
+<<<<<<< HEAD
       const { token, user } = await api.login({ email, password });
       setToken(token);
       onAuthSuccess(user);
     } catch (error) {
       console.error(error);
       setLoginError(error.message || 'E-mail ou senha incorretos.');
+=======
+      // Tenta logar o usuário no Firebase
+      await signInWithEmailAndPassword(auth, email, password);
+      // Se der certo, não precisamos fazer mais nada aqui! 
+      // O App.jsx vai perceber o login automaticamente.
+    } catch (error) {
+      console.error(error);
+      setLoginError('E-mail ou senha incorretos.');
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +67,11 @@ export default function Login({ onAuthSuccess }) {
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setSignupError('');
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
     const name = e.target.signupName.value;
     const email = e.target.signupEmail.value;
     const password = e.target.signupPassword.value;
@@ -56,12 +88,25 @@ export default function Login({ onAuthSuccess }) {
 
     setIsLoading(true);
     try {
+<<<<<<< HEAD
       const { token, user } = await api.register({ name, email, password });
       setToken(token);
       onAuthSuccess(user);
     } catch (error) {
       console.error(error);
       setSignupError(error.message || 'Erro ao criar conta. Tente novamente.');
+=======
+      // Tenta cadastrar o usuário no Firebase
+      await createUserWithEmailAndPassword(auth, email, password);
+      // Sucesso! O App.jsx será avisado automaticamente.
+    } catch (error) {
+      console.error(error);
+      if (error.code === 'auth/email-already-in-use') {
+        setSignupError('Este e-mail já está em uso.');
+      } else {
+        setSignupError('Erro ao criar conta. Tente novamente.');
+      }
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿import React, { useState, useEffect } from 'react';
 import { Plus, X, PiggyBank, Target, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 
@@ -6,10 +7,25 @@ import { api } from '../services/api';
 export default function Caixinhas({ user }) {
   const [caixinhas, setCaixinhas] = useState([]);
 
+=======
+import React, { useState, useEffect } from 'react';
+import { Plus, X, PiggyBank, Target, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+
+// IMPORTAÇÕES DO FIREBASE
+import { db } from '../services/firebase';
+import { collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+
+export default function Caixinhas({ user }) {
+  // 1. ESTADOS DO COMPONENTE
+  const [caixinhas, setCaixinhas] = useState([]);
+  
+  // Controle dos Modais
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [transactionModal, setTransactionModal] = useState({ isOpen: false, type: '', caixinha: null });
   const [isLoading, setIsLoading] = useState(false);
 
+<<<<<<< HEAD
   const [createData, setCreateData] = useState({ name: '', goalAmount: '' });
   const [transactionAmount, setTransactionAmount] = useState('');
 
@@ -27,27 +43,75 @@ export default function Caixinhas({ user }) {
     loadCaixinhas();
   }, [user?.uid]);
 
+=======
+  // Estado do formulário de Criar Caixinha
+  const [createData, setCreateData] = useState({ name: '', goalAmount: '' });
+  
+  // Estado do formulário de Guardar/Resgatar
+  const [transactionAmount, setTransactionAmount] = useState('');
+
+  // 2. BUSCANDO AS CAIXINHAS NO FIREBASE
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const q = query(collection(db, 'caixinhas'), where('userId', '==', user.uid));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const caixas = [];
+      snapshot.forEach((document) => {
+        caixas.push({ id: document.id, ...document.data() });
+      });
+      
+      // Ordena por data de criação (mais recentes primeiro)
+      caixas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setCaixinhas(caixas);
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
+
+  // 3. FUNÇÃO: CRIAR NOVA CAIXINHA
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
   const handleCreateCaixinha = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+<<<<<<< HEAD
       await api.createCaixinha({
         name: createData.name,
         goalAmount: Number(createData.goalAmount),
+=======
+      await addDoc(collection(db, 'caixinhas'), {
+        userId: user.uid,
+        name: createData.name,
+        goalAmount: Number(createData.goalAmount),
+        currentAmount: 0, // Toda caixinha começa zerada
+        createdAt: new Date().toISOString()
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
       });
 
       setCreateData({ name: '', goalAmount: '' });
       setIsCreateModalOpen(false);
+<<<<<<< HEAD
       await loadCaixinhas();
     } catch (error) {
       console.error('Erro ao criar caixinha: ', error);
       alert('Erro ao salvar. Tente novamente.');
+=======
+    } catch (error) {
+      console.error("Erro ao criar caixinha: ", error);
+      alert("Erro ao salvar. Tente novamente.");
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
     } finally {
       setIsLoading(false);
     }
   };
 
+<<<<<<< HEAD
+=======
+  // 4. FUNÇÃO: GUARDAR OU RESGATAR DINHEIRO
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
   const handleTransaction = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -56,6 +120,7 @@ export default function Caixinhas({ user }) {
     const amount = Number(transactionAmount);
 
     try {
+<<<<<<< HEAD
       if (type === 'deposit') {
         await api.depositCaixinha(caixinha.id, amount);
       } else if (type === 'withdraw') {
@@ -73,11 +138,39 @@ export default function Caixinhas({ user }) {
     } catch (error) {
       console.error('Erro na transação: ', error);
       alert(error.message || 'Erro ao processar o valor. Tente novamente.');
+=======
+      // Calcula o novo saldo baseado se é depósito (deposit) ou saque (withdraw)
+      let newBalance = caixinha.currentAmount;
+      
+      if (type === 'deposit') {
+        newBalance += amount;
+      } else if (type === 'withdraw') {
+        if (amount > caixinha.currentAmount) {
+          alert("Você não tem esse valor todo na caixinha para resgatar!");
+          setIsLoading(false);
+          return;
+        }
+        newBalance -= amount;
+      }
+
+      // Atualiza o documento lá no Firebase
+      const caixinhaRef = doc(db, 'caixinhas', caixinha.id);
+      await updateDoc(caixinhaRef, {
+        currentAmount: newBalance
+      });
+
+      setTransactionAmount('');
+      setTransactionModal({ isOpen: false, type: '', caixinha: null });
+    } catch (error) {
+      console.error("Erro na transação: ", error);
+      alert("Erro ao processar o valor. Tente novamente.");
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
     } finally {
       setIsLoading(false);
     }
   };
 
+<<<<<<< HEAD
   const handleDeleteCaixinha = async (id, currentAmount) => {
     if (currentAmount > 0) {
       alert('Você precisa resgatar todo o dinheiro antes de excluir a caixinha!');
@@ -91,6 +184,21 @@ export default function Caixinhas({ user }) {
       } catch (error) {
         console.error('Erro ao deletar: ', error);
         alert(error.message || 'Erro ao deletar. Tente novamente.');
+=======
+  // 5. FUNÇÃO: EXCLUIR CAIXINHA
+  const handleDeleteCaixinha = async (id, currentAmount) => {
+    if (currentAmount > 0) {
+      alert("Você precisa resgatar todo o dinheiro antes de excluir a caixinha!");
+      return;
+    }
+
+    if (window.confirm("Tem certeza que deseja excluir esta caixinha?")) {
+      try {
+        await deleteDoc(doc(db, 'caixinhas', id));
+      } catch (error) {
+        console.error("Erro ao deletar: ", error);
+        alert("Erro ao deletar. Tente novamente.");
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
       }
     }
   };
@@ -111,12 +219,21 @@ export default function Caixinhas({ user }) {
       {/* CABEÇALHO DA PÁGINA */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
+<<<<<<< HEAD
           <h2 className="text-3xl font-black text-[var(--brand-dark)]">Minhas Caixinhas</h2>
           <p className="text-[var(--brand-mid)] font-medium opacity-80 mt-1">Guarde dinheiro para seus objetivos e metas</p>
         </div>
         <button 
           onClick={() => setIsCreateModalOpen(true)}
           className="flex items-center gap-2 bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+=======
+          <h2 className="text-3xl font-black text-[#4c1d95]">Minhas Caixinhas</h2>
+          <p className="text-[#6b21a8] font-medium opacity-80 mt-1">Guarde dinheiro para seus objetivos e metas</p>
+        </div>
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
         >
           <Plus size={22} />
           Criar Caixinha
@@ -126,11 +243,19 @@ export default function Caixinhas({ user }) {
       {/* LISTA DE CAIXINHAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {caixinhas.length === 0 ? (
+<<<<<<< HEAD
           <div className="col-span-full bg-white p-12 rounded-3xl shadow-sm border border-[var(--brand-border)] flex flex-col items-center text-center">
             <div className="w-24 h-24 bg-[var(--brand-soft)] rounded-full flex items-center justify-center mb-4 text-[var(--brand)]">
               <PiggyBank size={40} />
             </div>
             <h3 className="text-xl font-bold text-[var(--brand-dark)] mb-2">Nenhuma caixinha criada</h3>
+=======
+          <div className="col-span-full bg-white p-12 rounded-3xl shadow-sm border border-purple-50 flex flex-col items-center text-center">
+            <div className="w-24 h-24 bg-purple-50 rounded-full flex items-center justify-center mb-4 text-[#8b5cf6]">
+              <PiggyBank size={40} />
+            </div>
+            <h3 className="text-xl font-bold text-[#4c1d95] mb-2">Nenhuma caixinha criada</h3>
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
             <p className="text-gray-500">Crie metas para organizar seu dinheiro (Ex: Viagem, Reserva de Emergência).</p>
           </div>
         ) : (
@@ -139,7 +264,11 @@ export default function Caixinhas({ user }) {
             const isGoalReached = caixa.currentAmount >= caixa.goalAmount;
 
             return (
+<<<<<<< HEAD
               <div key={caixa.id} className="bg-white p-6 rounded-3xl shadow-sm border border-[var(--brand-border)] hover:shadow-md transition-all relative group flex flex-col">
+=======
+              <div key={caixa.id} className="bg-white p-6 rounded-3xl shadow-sm border border-purple-50 hover:shadow-md transition-all relative group flex flex-col">
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                 
                 {/* Botão de Excluir */}
                 <button 
@@ -151,7 +280,11 @@ export default function Caixinhas({ user }) {
                 </button>
 
                 <div className="flex items-center gap-4 mb-5">
+<<<<<<< HEAD
                   <div className={`p-4 rounded-2xl ${isGoalReached ? 'bg-emerald-50 text-emerald-500' : 'bg-[var(--brand-soft)] text-[var(--brand)]'}`}>
+=======
+                  <div className={`p-4 rounded-2xl ${isGoalReached ? 'bg-emerald-50 text-emerald-500' : 'bg-[#f3e8ff] text-[#8b5cf6]'}`}>
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                     <PiggyBank size={28} />
                   </div>
                   <div>
@@ -163,7 +296,11 @@ export default function Caixinhas({ user }) {
                 {/* Saldo Atual */}
                 <div className="mb-4">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Saldo Guardado</p>
+<<<<<<< HEAD
                   <p className={`text-3xl font-black ${isGoalReached ? 'text-emerald-500' : 'text-[var(--brand)]'}`}>
+=======
+                  <p className={`text-3xl font-black ${isGoalReached ? 'text-emerald-500' : 'text-[#8b5cf6]'}`}>
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                     {formatCurrency(caixa.currentAmount)}
                   </p>
                 </div>
@@ -171,7 +308,11 @@ export default function Caixinhas({ user }) {
                 {/* Barra de Progresso */}
                 <div className="w-full bg-gray-100 rounded-full h-3 mb-2 overflow-hidden">
                   <div 
+<<<<<<< HEAD
                     className={`h-3 rounded-full transition-all duration-1000 ${isGoalReached ? 'bg-emerald-400' : 'bg-gradient-to-r from-[var(--brand)] to-[var(--brand-light)]'}`} 
+=======
+                    className={`h-3 rounded-full transition-all duration-1000 ${isGoalReached ? 'bg-emerald-400' : 'bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa]'}`} 
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
@@ -184,7 +325,11 @@ export default function Caixinhas({ user }) {
                 <div className="mt-auto flex gap-2">
                   <button 
                     onClick={() => setTransactionModal({ isOpen: true, type: 'deposit', caixinha: caixa })}
+<<<<<<< HEAD
                     className="flex-1 bg-[var(--brand-soft)] hover:bg-[var(--brand)] text-[var(--brand)] hover:text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+=======
+                    className="flex-1 bg-purple-50 hover:bg-[#8b5cf6] text-[#8b5cf6] hover:text-white font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                   >
                     <TrendingUp size={16} /> Guardar
                   </button>
@@ -207,10 +352,17 @@ export default function Caixinhas({ user }) {
       {/* MODAL 1: CRIAR NOVA CAIXINHA */}
       {/* ========================================================= */}
       {isCreateModalOpen && (
+<<<<<<< HEAD
         <div className="fixed inset-0 bg-[var(--brand-dark)]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all">
           <div className="bg-white rounded-[24px] w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
             
             <div className="bg-gradient-to-r from-[var(--brand)] to-[var(--brand-light)] p-6 flex justify-between items-center text-white">
+=======
+        <div className="fixed inset-0 bg-[#4c1d95]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all">
+          <div className="bg-white rounded-[24px] w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
+            
+            <div className="bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] p-6 flex justify-between items-center text-white">
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
               <h3 className="text-2xl font-bold tracking-wide">Criar Caixinha</h3>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-2 rounded-full">
                 <X size={20} />
@@ -221,7 +373,11 @@ export default function Caixinhas({ user }) {
               <label className="block">
                 <span className="text-sm font-bold text-gray-600 ml-1">Nome do Objetivo</span>
                 <input required type="text" placeholder="Ex: Viagem, Carro Novo, Reserva..."
+<<<<<<< HEAD
                   className="mt-1 w-full bg-gray-50 p-4 rounded-xl border border-gray-100 focus:border-[var(--brand)] outline-none text-[var(--brand-dark)] font-bold transition-all"
+=======
+                  className="mt-1 w-full bg-gray-50 p-4 rounded-xl border border-gray-100 focus:border-[#8b5cf6] outline-none text-[#4c1d95] font-bold transition-all"
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                   value={createData.name} onChange={(e) => setCreateData({...createData, name: e.target.value})}
                 />
               </label>
@@ -233,7 +389,11 @@ export default function Caixinhas({ user }) {
                     <Target className="text-gray-400" size={20} />
                   </div>
                   <input required type="number" step="0.01" min="1" placeholder="0.00"
+<<<<<<< HEAD
                     className="mt-1 w-full bg-gray-50 pl-11 p-4 rounded-xl border border-gray-100 focus:border-[var(--brand)] outline-none text-[var(--brand-dark)] font-bold transition-all"
+=======
+                    className="mt-1 w-full bg-gray-50 pl-11 p-4 rounded-xl border border-gray-100 focus:border-[#8b5cf6] outline-none text-[#4c1d95] font-bold transition-all"
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                     value={createData.goalAmount} onChange={(e) => setCreateData({...createData, goalAmount: e.target.value})}
                   />
                 </div>
@@ -241,7 +401,11 @@ export default function Caixinhas({ user }) {
 
               <div className="mt-8 pt-4">
                 <button type="submit" disabled={isLoading}
+<<<<<<< HEAD
                   className="w-full bg-[var(--brand)] hover:bg-[var(--brand-hover)] text-white font-black py-4 rounded-xl uppercase text-sm tracking-widest transition-all hover:shadow-lg disabled:opacity-50"
+=======
+                  className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-4 rounded-xl uppercase text-sm tracking-widest transition-all hover:shadow-lg disabled:opacity-50"
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                 >
                   {isLoading ? 'Criando...' : 'Criar Caixinha'}
                 </button>
@@ -255,10 +419,17 @@ export default function Caixinhas({ user }) {
       {/* MODAL 2: GUARDAR OU RESGATAR DINHEIRO */}
       {/* ========================================================= */}
       {transactionModal.isOpen && (
+<<<<<<< HEAD
         <div className="fixed inset-0 bg-[var(--brand-dark)]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all">
           <div className="bg-white rounded-[24px] w-full max-w-sm shadow-2xl overflow-hidden transform transition-all">
             
             <div className={`p-6 flex justify-between items-center text-white ${transactionModal.type === 'deposit' ? 'bg-[var(--brand)]' : 'bg-gray-800'}`}>
+=======
+        <div className="fixed inset-0 bg-[#4c1d95]/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all">
+          <div className="bg-white rounded-[24px] w-full max-w-sm shadow-2xl overflow-hidden transform transition-all">
+            
+            <div className={`p-6 flex justify-between items-center text-white ${transactionModal.type === 'deposit' ? 'bg-[#8b5cf6]' : 'bg-gray-800'}`}>
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
               <h3 className="text-xl font-bold">
                 {transactionModal.type === 'deposit' ? 'Guardar Dinheiro' : 'Resgatar Dinheiro'}
               </h3>
@@ -279,14 +450,22 @@ export default function Caixinhas({ user }) {
                   Qual valor deseja {transactionModal.type === 'deposit' ? 'guardar' : 'resgatar'}? (R$)
                 </span>
                 <input required type="number" step="0.01" min="0.01" placeholder="0.00"
+<<<<<<< HEAD
                   className="mt-1 w-full bg-gray-50 p-4 rounded-xl border border-gray-100 focus:border-[var(--brand)] outline-none text-[var(--brand-dark)] font-bold text-center text-2xl"
+=======
+                  className="mt-1 w-full bg-gray-50 p-4 rounded-xl border border-gray-100 focus:border-[#8b5cf6] outline-none text-[#4c1d95] font-bold text-center text-2xl"
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                   value={transactionAmount} onChange={(e) => setTransactionAmount(e.target.value)}
                 />
               </label>
 
               <button type="submit" disabled={isLoading}
                 className={`w-full text-white font-black py-4 rounded-xl uppercase text-sm tracking-widest transition-all shadow-md ${
+<<<<<<< HEAD
                   transactionModal.type === 'deposit' ? 'bg-[var(--brand)] hover:bg-[var(--brand-hover)]' : 'bg-gray-800 hover:bg-gray-900'
+=======
+                  transactionModal.type === 'deposit' ? 'bg-[#8b5cf6] hover:bg-[#7c3aed]' : 'bg-gray-800 hover:bg-gray-900'
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
                 } disabled:opacity-50`}
               >
                 {isLoading ? 'Processando...' : 'Confirmar'}

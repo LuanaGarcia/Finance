@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+<<<<<<< HEAD
   server: {
     host: true,
     port: 5173,
@@ -18,3 +19,6 @@ export default defineConfig({
     },
   },
 })
+=======
+})
+>>>>>>> b85f6c3a6870a19c4450e173c29bf170fc213c31
